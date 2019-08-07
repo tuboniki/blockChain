@@ -11,25 +11,33 @@ public class Block{
     private String previousHash;
     private String myHash;
 
+    private int proof;
+    private final int difficulty = 4;
+
     public Block(String sp,String rp,int m,int ind,LocalDateTime ts,String ph){
         tran = new Transaction(sp,rp,m);
         index = ind;
         timeStamp = ts;
         previousHash = ph;
+        proof = 0;
         myHash = calcHash(tran,index,timeStamp,previousHash);
     }
 
     private String calcHash(Transaction ts,int ind,LocalDateTime ldt,String pHash){
-        String result = "error";
+        String result = "errorHash";
         try{
-        String source = (ts.getString()).concat(String.valueOf(ind)).concat(pHash);
-        source = source.concat(ldt.toString());
+            String source = (ts.getString()).concat(String.valueOf(ind)).concat(pHash);
+            source = source.concat(ldt.toString());
 
-        Charset charset = StandardCharsets.UTF_8;
-        String algorithm = "SHA-512";
-        byte[] bytes = MessageDigest.getInstance(algorithm).digest(source.getBytes(charset));
-        //bytesCheck(bytes);
-        result = byteToString(bytes);
+            while(!isProofHash(result)){
+                proof++;
+                String proofString = source.concat(String.valueOf(proof));
+                Charset charset = StandardCharsets.UTF_8;
+                String algorithm = "SHA-512";
+                byte[] bytes = MessageDigest.getInstance(algorithm).digest(proofString.getBytes(charset));
+                //bytesCheck(bytes);
+                result = byteToString(bytes);
+            }
         }catch(Exception e){}
         return result;
     }
@@ -39,11 +47,22 @@ public class Block{
         System.out.println("年月日： " + timeStamp.toString());
         System.out.println("前ハシ： " + previousHash);
         System.out.println("ハシ　： " + myHash);
+        System.out.println("プルフ： " + proof);
+        System.out.println("難しさ： " + difficulty);
         System.out.println("");
         return;
     }
     public String getMyHash(){
         return myHash;
+    }
+    private boolean isProofHash(String hash){
+        String str = hash.substring(0, difficulty);
+        for(int i = 0;i<str.length();i++){
+            if(str.charAt(i)!='0'){
+                return false;
+            }
+        }
+        return true;
     }
     private String byteToString(byte[] bytes){
         String result = "";
@@ -53,7 +72,7 @@ public class Block{
         }
         return result;
     }
-    public void bytesCheck(byte[] bytes){
+    private void bytesCheck(byte[] bytes){
         for(int i = 0;i<bytes.length;i++){
             System.out.println(bytes[i]);
         }
