@@ -28,7 +28,8 @@ public class Block{
         Charset charset = StandardCharsets.UTF_8;
         String algorithm = "SHA-512";
         byte[] bytes = MessageDigest.getInstance(algorithm).digest(source.getBytes(charset));
-        result = new String(bytes, "UTF-8");
+        //bytesCheck(bytes);
+        result = byteToString(bytes);
         }catch(Exception e){}
         return result;
     }
@@ -36,9 +37,26 @@ public class Block{
         tran.printTransaction();
         System.out.println("ID　　： " + index);
         System.out.println("年月日： " + timeStamp.toString());
-        System.out.println("前塊　： " + previousHash);
+        System.out.println("前ハシ： " + previousHash);
         System.out.println("ハシ　： " + myHash);
+        System.out.println("");
         return;
+    }
+    public String getMyHash(){
+        return myHash;
+    }
+    private String byteToString(byte[] bytes){
+        String result = "";
+        for(int i = 0;i<bytes.length;i++){
+            int a16 = bytes[i] + 128;
+            result = result.concat(String.format("%02x", a16));
+        }
+        return result;
+    }
+    public void bytesCheck(byte[] bytes){
+        for(int i = 0;i<bytes.length;i++){
+            System.out.println(bytes[i]);
+        }
     }
 }
 
