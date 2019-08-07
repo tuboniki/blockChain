@@ -5,29 +5,27 @@ import java.nio.charset.*;
 import java.security.*;
 
 public class Block{
-    private Transaction tran;
-    private int index;
-    private LocalDateTime timeStamp;
-    private String previousHash;
-    private String myHash;
+    private Transaction tran;//取引データ
+    private int index;//通し番号のID
+    private String previousHash;//前のブロックのハッシュ値
+    private String myHash;//このブロックのハッシュ値
 
-    private int proof;
-    private final int difficulty = 4;
+    private final int difficulty = 4;//ハッシュの条件。ここでは先頭4桁が0でなければならない。
+    private int proof;//ハッシュの条件を満たす値。これを探すことをマイニングと呼ぶ。
 
     public Block(String sp,String rp,int m,int ind,LocalDateTime ts,String ph){
-        tran = new Transaction(sp,rp,m);
+        tran = new Transaction(sp,rp,m,ts);
         index = ind;
-        timeStamp = ts;
         previousHash = ph;
         proof = 0;
-        myHash = calcHash(tran,index,timeStamp,previousHash);
+        myHash = calcHash(tran,index,previousHash);
     }
 
-    private String calcHash(Transaction ts,int ind,LocalDateTime ldt,String pHash){
+    //ハッシュの計算を行う関数
+    private String calcHash(Transaction ts,int ind,String pHash){
         String result = "errorHash";
         try{
             String source = (ts.getString()).concat(String.valueOf(ind)).concat(pHash);
-            source = source.concat(ldt.toString());
 
             while(!isProofHash(result)){
                 proof++;
@@ -41,10 +39,10 @@ public class Block{
         }catch(Exception e){}
         return result;
     }
+    //詳細を表示する関数
     public void printBlock(){
         tran.printTransaction();
         System.out.println("ID　　： " + index);
-        System.out.println("年月日： " + timeStamp.toString());
         System.out.println("前ハシ： " + previousHash);
         System.out.println("ハシ　： " + myHash);
         System.out.println("プルフ： " + proof);
@@ -52,9 +50,11 @@ public class Block{
         System.out.println("");
         return;
     }
+
     public String getMyHash(){
         return myHash;
     }
+    //ハッシュ値が条件に合うかどうか調べる関数
     private boolean isProofHash(String hash){
         String str = hash.substring(0, difficulty);
         for(int i = 0;i<str.length();i++){
@@ -64,6 +64,7 @@ public class Block{
         }
         return true;
     }
+    //byte配列を16新数に変換する関数
     private String byteToString(byte[] bytes){
         String result = "";
         for(int i = 0;i<bytes.length;i++){
@@ -72,6 +73,7 @@ public class Block{
         }
         return result;
     }
+    //byte配列の中身を確認する関数(デバッグ用)
     private void bytesCheck(byte[] bytes){
         for(int i = 0;i<bytes.length;i++){
             System.out.println(bytes[i]);
@@ -79,31 +81,39 @@ public class Block{
     }
 }
 
+//取引に関するデータをまとめたもの
 class Transaction{
     protected String sendPerson;
     protected String receivePerson;
+    private LocalDateTime timeStamp;
     protected int money;
 
-    public Transaction(String s,String r,int m){
+    public Transaction(String s,String r,int m,LocalDateTime ts){
         sendPerson = s;
         receivePerson = r;
         money = m;
+        timeStamp = ts;
     }
 
     public Transaction getTransaction(){
         return this;
     }
 
+    //ハッシュを計算するために渡す文字列を生成する関数
     public String getString(){
         String result;
         result = (sendPerson.concat(receivePerson)).concat(String.valueOf(money));
+        result = result.concat(timeStamp.toString());
         return result;
     }
 
+    //詳細を表示する関数
     public void printTransaction(){
+        System.out.println("取引データ");
         System.out.println("差出人： " + sendPerson);
         System.out.println("あて先： " + receivePerson);
         System.out.println("金額　： " + money);
+        System.out.println("時間　： " + timeStamp);
         return;
     }
 
