@@ -20,7 +20,7 @@ public class BlockChain{
         for(int i = 0;i<5;i++){
             generateBlock();
         }
-        printBlockChain();
+        printBlockChain();//
     }
 
     //ブロックの生成。
